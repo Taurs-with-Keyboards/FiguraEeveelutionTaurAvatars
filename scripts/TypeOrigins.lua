@@ -54,7 +54,7 @@ local t = {}
 -- Action
 t.originAct = action_wheel:newAction()
 	:item(itemCheck("ender_pearl"))
-	:toggleItem(itemCheck("origins:orb_of_origin"))
+	:toggleItem(itemCheck("origins:orb_of_origin", "snowball"))
 	:onToggle(pings.setOrigin)
 	:toggled(typeData.origin)
 
