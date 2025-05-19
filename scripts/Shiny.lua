@@ -23,7 +23,7 @@ end
 
 -- Config setup
 config:name("EeveelutionTaur")
-typeData.shiny = config:load("ShinyToggle") or false
+typeData.shiny = config:load("ShinyToggle") == nil and vec(client.uuidToIntArray(avatar:getUUID())).x % 4096 == 0 or config:load("ShinyToggle")
 
 -- Store data
 local initTex = {}
