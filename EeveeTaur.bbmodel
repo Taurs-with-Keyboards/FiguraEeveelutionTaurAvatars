@@ -17636,7 +17636,7 @@
 		},
 		{
 			"uuid": "6363598c-405d-3bca-1fc2-9a477e3f47c6",
-			"name": "glowParts",
+			"name": "GlowParts",
 			"export_codec": "",
 			"export_path": "",
 			"children": [
