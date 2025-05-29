@@ -82,7 +82,7 @@ for k, ear in pairs(ears.left) do
 	squishyEars[k] = squapi.ear:new(
 		ear,
 		ears.right[k],
-		0.25,             -- Range Multiplier (0.25)
+		0,                -- Range Multiplier (0)
 		k:find("vaporeon") or
 		k:find("espeon"), -- Horizontal (Based on type)
 		2,                -- Bend Strength (2)

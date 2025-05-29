@@ -17,6 +17,7 @@ A Figura Avatar template designed to give the user a customizable taur body base
 - Grandpa Scout (GSAnimBlend, GSCarrier)
 - Squishy (SquAPI)
 - Katt (OriginsAPI, KattArmor, DynamicCrosshair)
+- Bitslayn (Gaze API)
 - 4P5 (GroundCheck)
 - Manuel (Molang Conversions)
 - Auria (Molang Conversions)
