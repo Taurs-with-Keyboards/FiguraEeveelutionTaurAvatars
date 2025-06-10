@@ -198,7 +198,7 @@ function pings.setEyesNightVision(boolean)
 	
 end
 
--- Sync variable
+-- Sync variables
 function pings.syncEyes(a, b, c)
 	
 	toggle      = a

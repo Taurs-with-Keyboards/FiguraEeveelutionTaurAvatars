@@ -25,7 +25,7 @@ function events.TICK()
 	
 end
 
--- Stone toggle
+-- Origin toggle
 function pings.setOrigin(boolean)
 	
 	typeData.origin = boolean
