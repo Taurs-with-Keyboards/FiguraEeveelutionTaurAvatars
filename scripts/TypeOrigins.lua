@@ -48,6 +48,15 @@ local itemCheck = require("lib.ItemCheck")
 local s, c = pcall(require, "scripts.ColorProperties")
 if not s then c = {} end
 
+-- Sync on tick
+function events.TICK()
+	
+	if world.getTime() % 200 == 0 then
+		pings.syncOrigin(typeData.origin)
+	end
+	
+end
+
 -- Table setup
 local t = {}
 
