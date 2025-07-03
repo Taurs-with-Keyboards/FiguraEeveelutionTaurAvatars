@@ -210,11 +210,6 @@ end
 -- Host only instructions
 if not host:isHost() then return end
 
--- Required scripts
-local itemCheck = require("lib.ItemCheck")
-local s, c = pcall(require, "scripts.ColorProperties")
-if not s then c = {} end
-
 -- Sync on tick
 function events.TICK()
 	
@@ -224,21 +219,34 @@ function events.TICK()
 	
 end
 
--- Table setup
-local t = {}
+-- Required scripts
+local s, wheel, itemCheck, c = pcall(require, "scripts.ActionWheel")
+if not s then return end -- Kills script early if ActionWheel.lua isnt found
+pcall(require, "scripts.Glowing") -- Tries to find script, not required
+
+-- Pages
+local parentPage = action_wheel:getPage("Glow") or action_wheel:getPage("Main")
+local glowEyesPage = action_wheel:newPage("GlowEyes")
+
+-- Actions table setup
+local a = {}
 
 -- Actions
-t.toggleAct = action_wheel:newAction()
+a.pageAct = parentPage:newAction()
+	:item(itemCheck("ender_eye"))
+	:onLeftClick(function() wheel:descend(glowEyesPage) end)
+
+a.toggleAct = glowEyesPage:newAction()
 	:item(itemCheck("ender_pearl"))
 	:toggleItem(itemCheck("ender_eye"))
 	:onToggle(pings.setEyesToggle)
 
-t.powerAct = action_wheel:newAction()
+a.powerAct = glowEyesPage:newAction()
 	:item(itemCheck("terracotta"))
 	:onToggle(pings.setEyesPower)
 	:toggled(power)
 
-t.nightVisionAct = action_wheel:newAction()
+a.nightVisionAct = glowEyesPage:newAction()
 	:item(itemCheck("glass_bottle"))
 	:toggleItem(itemCheck("potion{CustomPotionColor:" .. tostring(0x96C54F) .. "}"))
 	:onToggle(pings.setEyesNightVision)
@@ -248,7 +256,12 @@ t.nightVisionAct = action_wheel:newAction()
 function events.RENDER(delta, context)
 	
 	if action_wheel:isEnabled() then
-		t.toggleAct
+		a.pageAct
+			:title(toJson(
+				{text = "Glowing Eyes Settings", bold = true, color = c.primary}
+			))
+		
+		a.toggleAct
 			:title(toJson(
 				{
 					"",
@@ -260,7 +273,7 @@ function events.RENDER(delta, context)
 			))
 			:toggled(toggle)
 		
-		t.powerAct
+		a.powerAct
 			:title(toJson(
 				{
 					"",
@@ -270,7 +283,7 @@ function events.RENDER(delta, context)
 			))
 			:toggleItem(typeData.data[typeData.tarString].stone)
 		
-		t.nightVisionAct
+		a.nightVisionAct
 			:title(toJson(
 				{
 					"",
@@ -281,13 +294,10 @@ function events.RENDER(delta, context)
 				}
 			))
 		
-		for _, act in pairs(t) do
+		for _, act in pairs(a) do
 			act:hoverColor(c.hover):toggleColor(c.active)
 		end
 		
 	end
 	
 end
-
--- Return actions
-return t

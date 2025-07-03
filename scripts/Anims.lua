@@ -231,11 +231,6 @@ end
 -- Host only instructions
 if not host:isHost() then return end
 
--- Required scripts
-local itemCheck = require("lib.ItemCheck")
-local s, c = pcall(require, "scripts.ColorProperties")
-if not s then c = {} end
-
 -- Sit keybind
 local sitBind   = config:load("AnimSitKeybind") or "key.keyboard.keypad.3"
 local setSitKey = keybinds:newKeybind("Sit Animation"):onPress(function() pings.setAnimToggleSit(not anims.sit:isPlaying()) end):key(sitBind)
@@ -260,16 +255,34 @@ function events.TICK()
 	
 end
 
--- Table setup
-local t = {}
+-- Required scripts
+local s, wheel, itemCheck, c = pcall(require, "scripts.ActionWheel")
+if not s then return end -- Kills script early if ActionWheel.lua isnt found
+pcall(require, "scripts.Accessories") -- Tries to find script, not required
+
+-- Check for if page already exists
+local pageExists = action_wheel:getPage("Anims")
+
+-- Pages
+local parentPage = action_wheel:getPage("Main")
+local animsPage  = pageExists or action_wheel:newPage("Anims")
+
+-- Actions table setup
+local a = {}
 
 -- Actions
-t.sitAct = action_wheel:newAction()
+if not pageExists then
+	a.pageAct = parentPage:newAction()
+		:item(itemCheck("jukebox"))
+		:onLeftClick(function() wheel:descend(animsPage) end)
+end
+
+a.sitAct = animsPage:newAction()
 	:item(itemCheck("scaffolding"))
 	:toggleItem(itemCheck("saddle"))
 	:onToggle(pings.setAnimToggleSit)
 
-t.lieAct = action_wheel:newAction()
+a.lieAct = animsPage:newAction()
 	:item(itemCheck("red_bed"))
 	:toggleItem(itemCheck("saddle"))
 	:onToggle(pings.setAnimToggleLying)
@@ -278,25 +291,29 @@ t.lieAct = action_wheel:newAction()
 function events.RENDER(delta, context)
 	
 	if action_wheel:isEnabled() then
-		t.sitAct
+		if a.pageAct then
+			a.pageAct
+				:title(toJson(
+					{text = "Animation Settings", bold = true, color = c.primary}
+				))
+		end
+		
+		a.sitAct
 			:title(toJson(
 				{text = "Play Sit animation", bold = true, color = c.primary}
 			))
 			:toggled(anims.sit:isPlaying())
 		
-		t.lieAct
+		a.lieAct
 			:title(toJson(
 				{text = "Play Lie Down animation", bold = true, color = c.primary}
 			))
 			:toggled(anims.lying:isPlaying())
 		
-		for _, act in pairs(t) do
+		for _, act in pairs(a) do
 			act:hoverColor(c.hover):toggleColor(c.active)
 		end
 		
 	end
 	
 end
-
--- Returns actions
-return t

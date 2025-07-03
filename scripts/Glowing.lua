@@ -112,11 +112,6 @@ end
 -- Host only instructions
 if not host:isHost() then return end
 
--- Required scripts
-local itemCheck = require("lib.ItemCheck")
-local s, c = pcall(require, "scripts.ColorProperties")
-if not s then c = {} end
-
 -- Sync on tick
 function events.TICK()
 	
@@ -126,17 +121,30 @@ function events.TICK()
 	
 end
 
--- Table setup
-local t = {}
+-- Required scripts
+local s, wheel, itemCheck, c = pcall(require, "scripts.ActionWheel")
+if not s then return end -- Kills script early if ActionWheel.lua isnt found
+pcall(require, "scripts.Pokeball") -- Tries to find script, not required
+
+-- Pages
+local parentPage = action_wheel:getPage("Main")
+local glowPage   = action_wheel:newPage("Glow")
+
+-- Actions table setup
+local a = {}
 
 -- Actions
-t.toggleAct = action_wheel:newAction()
+a.pageAct = parentPage:newAction()
+	:item(itemCheck("glow_ink_sac"))
+	:onLeftClick(function() wheel:descend(glowPage) end)
+
+a.toggleAct = glowPage:newAction()
 	:item(itemCheck("ink_sac"))
 	:toggleItem(itemCheck("glow_ink_sac"))
 	:onToggle(pings.setGlowToggle)
 	:toggled(toggle)
 
-t.specialAct = action_wheel:newAction()
+a.specialAct = glowPage:newAction()
 	:item(itemCheck("amethyst_shard"))
 	:toggleItem(itemCheck("amethyst_cluster"))
 	:onToggle(pings.setGlowSpecial)
@@ -146,7 +154,12 @@ t.specialAct = action_wheel:newAction()
 function events.RENDER(delta, context)
 	
 	if action_wheel:isEnabled() then
-		t.toggleAct
+		a.pageAct
+			:title(toJson(
+				{text = "Glowing Settings", bold = true, color = c.primary}
+			))
+		
+		a.toggleAct
 			:title(toJson(
 				{
 					"",
@@ -158,7 +171,7 @@ function events.RENDER(delta, context)
 			))
 			:toggled(toggle)
 		
-		t.specialAct
+		a.specialAct
 			:title(toJson(
 				{
 					"",
@@ -167,13 +180,10 @@ function events.RENDER(delta, context)
 				}
 			))
 		
-		for _, act in pairs(t) do
+		for _, act in pairs(a) do
 			act:hoverColor(c.hover):toggleColor(c.active)
 		end
 		
 	end
 	
 end
-
--- Return actions
-return t

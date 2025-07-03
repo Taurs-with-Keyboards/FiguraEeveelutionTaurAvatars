@@ -253,11 +253,6 @@ end
 -- Host only instructions
 if not host:isHost() then return end
 
--- Required scripts
-local itemCheck = require("lib.ItemCheck")
-local s, c = pcall(require, "scripts.ColorProperties")
-if not s then c = {} end
-
 -- Check if any bob animations are playing
 local function checkBob()
 	
@@ -320,15 +315,32 @@ function events.TICK()
 	
 end
 
--- Table setup
-local t = {}
+-- Required script
+local s, wheel, itemCheck, c = pcall(require, "scripts.ActionWheel")
+if not s then return end -- Kills script early if ActionWheel.lua isnt found
+
+-- Check for if page already exists
+local pageExists = action_wheel:getPage("Eeveelution")
+
+-- Pages
+local parentPage      = action_wheel:getPage("Main")
+local eeveelutionPage = pageExists or action_wheel:newPage("Eeveelution")
+
+-- Actions table setup
+local a = {}
 
 -- Actions
-t.toggleAct = action_wheel:newAction()
+if not pageExists then
+	a.pageAct = parentPage:newAction()
+		:item(itemCheck("cobblemon:everstone", "rabbit_spawn_egg"))
+		:onLeftClick(function() wheel:descend(eeveelutionPage) end)
+end
+
+a.toggleAct = eeveelutionPage:newAction()
 	:item(itemCheck("cobblemon:poke_ball", "ender_pearl"))
 	:onToggle(pings.setPokeball)
 
-t.typeHideAct = action_wheel:newAction()
+a.typeHideAct = eeveelutionPage:newAction()
 	:item(itemCheck("player_head{SkullOwner:"..avatar:getEntityName().."}"))
 	:toggleItem(itemCheck("cobblemon:poke_ball", "snowball"))
 	:onToggle(pings.setPokeballTypeHide)
@@ -338,7 +350,14 @@ t.typeHideAct = action_wheel:newAction()
 function events.RENDER(delta, context)
 	
 	if action_wheel:isEnabled() then
-		t.toggleAct
+		if a.pageAct then
+			a.pageAct
+				:title(toJson(
+					{text = "Eeveelutions Settings", bold = true, color = c.primary}
+				))
+		end
+		
+		a.toggleAct
 			:title(toJson(
 				{
 					"",
@@ -351,7 +370,7 @@ function events.RENDER(delta, context)
 			))
 			:toggled(toggle)
 		
-		t.typeHideAct
+		a.typeHideAct
 			:title(toJson(
 				{
 					"",
@@ -360,7 +379,7 @@ function events.RENDER(delta, context)
 				}
 			))
 		
-		for _, act in pairs(t) do
+		for _, act in pairs(a) do
 			act:hoverColor(c.hover):toggleColor(c.active)
 		end
 		
@@ -368,5 +387,5 @@ function events.RENDER(delta, context)
 	
 end
 
--- Return actions
-return t
+-- Return actions (This is specifically for TypePicker.lua to be able to move an action)
+return a

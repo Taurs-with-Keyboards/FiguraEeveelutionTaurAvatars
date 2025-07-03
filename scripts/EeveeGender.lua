@@ -86,11 +86,6 @@ end
 -- Host only instructions
 if not host:isHost() then return end
 
--- Required scripts
-local itemCheck = require("lib.ItemCheck")
-local s, c = pcall(require, "scripts.ColorProperties")
-if not s then c = {} end
-
 -- Sync on tick
 function events.TICK()
 	
@@ -100,20 +95,45 @@ function events.TICK()
 	
 end
 
--- Table setup
-local t = {}
+-- Required scripts
+local s, wheel, itemCheck, c = pcall(require, "scripts.ActionWheel")
+if not s then return end -- Kills script early if ActionWheel.lua isnt found
+pcall(require, "scripts.Shiny") -- Tries to find script, not required
 
--- Action
-t.genderAct = action_wheel:newAction()
+-- Check for if page already exists
+local pageExists = action_wheel:getPage("Eeveelution")
+
+-- Pages
+local parentPage      = action_wheel:getPage("Main")
+local eeveelutionPage = pageExists or action_wheel:newPage("Eeveelution")
+
+-- Actions table setup
+local a = {}
+
+-- Actions
+if not pageExists then
+	a.pageAct = parentPage:newAction()
+		:item(itemCheck("cobblemon:everstone", "rabbit_spawn_egg"))
+		:onLeftClick(function() wheel:descend(eeveelutionPage) end)
+end
+
+a.genderAct = eeveelutionPage:newAction()
 	:item(itemCheck("blue_dye"))
 	:toggleItem(itemCheck("pink_dye"))
 	:onToggle(pings.setGenderToggle)
 
--- Update action
+-- Update actions
 function events.RENDER(delta, context)
 	
 	if action_wheel:isEnabled() then
-		t.genderAct
+		if a.pageAct then
+			a.pageAct
+				:title(toJson(
+					{text = "Eeveelutions Settings", bold = true, color = c.primary}
+				))
+		end
+		
+		a.genderAct
 			:title(toJson(
 				{
 					"",
@@ -125,13 +145,10 @@ function events.RENDER(delta, context)
 			))
 			:toggled(gender)
 		
-		for _, act in pairs(t) do
+		for _, act in pairs(a) do
 			act:hoverColor(c.hover):toggleColor(c.active)
 		end
 		
 	end
 	
 end
-
--- Return action
-return t

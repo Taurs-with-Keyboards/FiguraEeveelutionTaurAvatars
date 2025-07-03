@@ -133,8 +133,19 @@ end
 -- Host only instructions
 if not host:isHost() then return end
 
--- Required script
-local itemCheck = require("lib.ItemCheck")
+-- Sync on tick
+function events.TICK()
+	
+	if world.getTime() % 200 == 0 then
+		pings.syncShiny(typeData.shiny)
+	end
+	
+end
+
+-- Required scripts
+local s, wheel, itemCheck = pcall(require, "scripts.ActionWheel")
+if not s then return end -- Kills script early if ActionWheel.lua isnt found
+pcall(require, "scripts.Pokeball") -- Tries to find script, not required
 
 -- Secondary colors
 if allowColor then
@@ -151,29 +162,40 @@ if allowColor then
 	
 end
 
--- Sync on tick
-function events.TICK()
-	
-	if world.getTime() % 200 == 0 then
-		pings.syncShiny(typeData.shiny)
-	end
-	
+-- Check for if page already exists
+local pageExists = action_wheel:getPage("Eeveelution")
+
+-- Pages
+local parentPage      = action_wheel:getPage("Main")
+local eeveelutionPage = pageExists or action_wheel:newPage("Eeveelution")
+
+-- Actions table setup
+local a = {}
+
+-- Actions
+if not pageExists then
+	a.pageAct = parentPage:newAction()
+		:item(itemCheck("cobblemon:everstone", "rabbit_spawn_egg"))
+		:onLeftClick(function() wheel:descend(eeveelutionPage) end)
 end
 
--- Table setup
-local t = {}
-
--- Action
-t.shinyAct = action_wheel:newAction()
+a.shinyAct = eeveelutionPage:newAction()
 	:item(itemCheck("gunpowder"))
 	:toggleItem(itemCheck("glowstone_dust"))
 	:onToggle(pings.setShinyToggle)
 
--- Update action
+-- Update actions
 function events.RENDER(delta, context)
 	
 	if action_wheel:isEnabled() then
-		t.shinyAct
+		if a.pageAct then
+			a.pageAct
+				:title(toJson(
+					{text = "Eeveelutions Settings", bold = true, color = c.primary}
+				))
+		end
+		
+		a.shinyAct
 			:title(toJson(
 				{
 					"",
@@ -183,13 +205,10 @@ function events.RENDER(delta, context)
 			))
 			:toggled(typeData.shiny)
 		
-		for _, act in pairs(t) do
+		for _, act in pairs(a) do
 			act:hoverColor(c.hover):toggleColor(c.active)
 		end
 		
 	end
 	
 end
-
--- Return action
-return t
