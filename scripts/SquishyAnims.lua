@@ -45,9 +45,9 @@ local function matchType(n)
 end
 
 -- Lerp tables
-local leftArmLerp  = lerp:new(0.5, armsMove and 1 or 0)
-local rightArmLerp = lerp:new(0.5, armsMove and 1 or 0)
-local taurLerp     = lerp:new(0.2, 1)
+local leftArmLerp  = lerp:new(armsMove and 1 or 0, 0.5)
+local rightArmLerp = lerp:new(armsMove and 1 or 0, 0.5)
+local taurLerp     = lerp:new(1)
 
 -- Find ears
 local ears = {}

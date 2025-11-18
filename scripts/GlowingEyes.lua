@@ -15,7 +15,7 @@ local nightVision = config:load("EyesNightVision") or false
 local glowParts = parts:createTable(function(part) return part:getName():find("_[eE]ye[gG]low") end)
 
 -- Eyes lerp
-local eyesLerp = lerp:new(0.1, toggle and 1 or 0)
+local eyesLerp = lerp:new(toggle and 1 or 0, 0.1)
 
 --[[
 	Power tables:

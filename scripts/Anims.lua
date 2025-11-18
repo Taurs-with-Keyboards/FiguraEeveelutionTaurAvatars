@@ -15,7 +15,7 @@ local canSit = false
 local canLie = false
 
 -- Sprint lerp
-local sprintLerp = lerp:new(0.2, 1)
+local sprintLerp = lerp:new(1)
 
 -- Animations setup
 local anims = animations.EeveeTaur
